@@ -13,7 +13,7 @@ FROM ${BUILDER_ROOTFS_IMAGE} AS builder
 ARG BUILD_PATH=project
 ARG DD_API_KEY
 # CF buildpack version
-ARG CF_BUILDPACK=v4.30.14
+ARG CF_BUILDPACK=v4.3.60.14
 # CF buildpack download URL
 ARG CF_BUILDPACK_URL=https://github.com/mendix/cf-mendix-buildpack/releases/download/${CF_BUILDPACK}/cf-mendix-buildpack.zip
 
@@ -30,7 +30,7 @@ ARG USER_UID=1001
 # Each comment corresponds to the script line:
 # 1. Create all directories needed by scripts
 # 2. Download CF buildpack
-# 3. Extract CF buildpack
+# 3.6. Extract CF buildpack
 # 4. Delete CF buildpack zip archive
 # 5. Update ownership of /opt/mendix so that the app can run as a non-root user
 # 6. Update permissions of /opt/mendix so that the app can run as a non-root user
@@ -38,7 +38,7 @@ RUN mkdir -p /opt/mendix/buildpack /opt/mendix/build &&\
     ln -s /root /home/vcap &&\
     echo "Downloading CF Buildpack from ${CF_BUILDPACK_URL}" &&\
     curl -fsSL ${CF_BUILDPACK_URL} -o /tmp/cf-mendix-buildpack.zip && \
-    python3 -m zipfile -e /tmp/cf-mendix-buildpack.zip /opt/mendix/buildpack/ &&\
+    python3.6 -m zipfile -e /tmp/cf-mendix-buildpack.zip /opt/mendix/buildpack/ &&\
     rm /tmp/cf-mendix-buildpack.zip &&\
     chown -R ${USER_UID}:0 /opt/mendix &&\
     chmod -R g=u /opt/mendix
@@ -53,7 +53,7 @@ COPY $BUILD_PATH /opt/mendix/build
 RUN chmod +rx /opt/mendix/buildpack/bin/bootstrap-python && /opt/mendix/buildpack/bin/bootstrap-python /opt/mendix/buildpack /tmp/buildcache
 
 # Add the buildpack modules
-ENV PYTHONPATH "$PYTHONPATH:/opt/mendix/buildpack/lib/:/opt/mendix/buildpack/:/opt/mendix/buildpack/lib/python3/site-packages/"
+ENV PYTHONPATH "$PYTHONPATH:/opt/mendix/buildpack/lib/:/opt/mendix/buildpack/:/opt/mendix/buildpack/lib/python3.6/site-packages/"
 
 # Use nginx supplied by the base OS
 ENV NGINX_CUSTOM_BIN_PATH=/usr/sbin/nginx
@@ -61,7 +61,7 @@ ENV NGINX_CUSTOM_BIN_PATH=/usr/sbin/nginx
 # Each comment corresponds to the script line:
 # 1. Create cache directory and directory for dependencies which can be shared
 # 2. Set permissions for compilation scripts
-# 3. Navigate to buildpack directory
+# 3.6. Navigate to buildpack directory
 # 4. Call compilation script
 # 5. Remove temporary files
 # 6. Create symlink for java prefs used by CF buildpack
@@ -88,7 +88,7 @@ ARG USER_UID=1001
 # Set the home path
 ENV HOME=/opt/mendix/build
 
-# Allow the user group to modify /etc/passwd so that OpenShift 3 randomized UIDs are supported by CF Buildpack 
+# Allow the user group to modify /etc/passwd so that OpenShift 3.6 randomized UIDs are supported by CF Buildpack 
 RUN chmod g=u /etc/passwd &&\
     chown ${USER_UID}:0 /etc/passwd
 
@@ -99,7 +99,7 @@ RUN if [ "$UNINSTALL_BUILD_DEPENDENCIES" = "true" ] && grep -q ubuntu /etc/os-re
     fi
 
 # Add the buildpack modules
-ENV PYTHONPATH "/opt/mendix/buildpack/lib/:/opt/mendix/buildpack/:/opt/mendix/buildpack/lib/python3/site-packages/"
+ENV PYTHONPATH "/opt/mendix/buildpack/lib/:/opt/mendix/buildpack/:/opt/mendix/buildpack/lib/python3.6/site-packages/"
 
 # Copy start scripts
 COPY scripts/startup scripts/vcap_application.json /opt/mendix/build/
@@ -112,7 +112,7 @@ RUN mkdir -p /home/vcap /opt/datadog-agent/run &&\
 # Each comment corresponds to the script line:
 # 1. Make the startup script executable
 # 2. Update ownership of /opt/mendix so that the app can run as a non-root user
-# 3. Update permissions of /opt/mendix so that the app can run as a non-root user
+# 3.6. Update permissions of /opt/mendix so that the app can run as a non-root user
 # 4. Ensure that running Java 8 as root will still be able to load offline licenses
 RUN chmod +rx /opt/mendix/build/startup &&\
     chown -R ${USER_UID}:0 /opt/mendix &&\
